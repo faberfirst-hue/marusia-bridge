@@ -19,7 +19,12 @@ exports.handler = async (event) => {
     });
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    
+    if (!data.choices || !data.choices[0]) {
+      throw new Error('OpenAI API returned no choices');
+    }
+    
+    const aiResponse = data.choices[0].message?.content || 'Нет ответа';
 
     return {
       statusCode: 200,
