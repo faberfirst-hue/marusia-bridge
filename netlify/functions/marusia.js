@@ -3,19 +3,16 @@ exports.handler = async (event) => {
     const request = JSON.parse(event.body);
     const userCommand = request.request.original_utterance || "Привет";
     
-    // Бесплатный API без ключей
-    const response = await require('node-fetch')('https://api.vsegpt.ru/v1/chat/completions', {
+    // Полностью бесплатный API без ключей
+    const response = await require('node-fetch')('https://chatgpt-api.shn.hk/v1/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'MarusiaBot/1.0'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-3.5-turbo',
+        model: 'gpt-3.5-turbo',
         messages: [{role: 'user', content: userCommand}],
-        max_tokens: 100,
-        temperature: 0.7,
-        stream: false
+        max_tokens: 100
       })
     });
 
@@ -28,7 +25,7 @@ exports.handler = async (event) => {
           version: request.version,
           session: request.session,
           response: {
-            text: 'Привет! Я ваш ассистент. Чем могу помочь?',
+            text: 'Привет! Чем могу помочь?',
             end_session: false
           }
         })
@@ -55,7 +52,7 @@ exports.handler = async (event) => {
         version: "1.0",
         session: event.session,
         response: {
-          text: "Привет! Рад вас слышать.",
+          text: "Здравствуйте! Задайте ваш вопрос.",
           end_session: false
         }
       })
