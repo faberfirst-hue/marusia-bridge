@@ -1,4 +1,4 @@
-const API_KEY = 'sk-...'; // Ключ от DeepSeek API
+const API_KEY = 'sk-7c97e6b0173d48ec902c173e4d9cf80b'
 
 exports.handler = async (event) => {
   try {
