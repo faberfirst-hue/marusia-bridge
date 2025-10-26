@@ -3,7 +3,7 @@ const API_KEY = process.env.OPENAI_API_KEY;
 exports.handler = async (event) => {
   try {
     const request = JSON.parse(event.body);
-    const userCommand = request.request.command || "Привет";
+    const userCommand = request.request.command || (request.request.type === "SimpleUtterance" ? "Привет" : "Поприветствуй меня");
     
     const response = await require('node-fetch')("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     const data = await response.json();
     
     if (!data.choices || !data.choices[0]) {
-      throw new Error('DeepSeek API returned no choices');
+      throw new Error('DeepSeek API returned no choices: ' + JSON.stringify(data));
     }
     
     const aiResponse = data.choices[0].message?.content || 'Нет ответа';
