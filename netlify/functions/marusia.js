@@ -1,39 +1,64 @@
-exports.handler = async (event) => {
-  const request = JSON.parse(event.body);
-  const userText = request.request.original_utterance || '';
-  const isFirstLaunch = request.session.new;
-  
-  let responseText = '';
-  
-  if (isFirstLaunch || !userText) {
-    responseText = 'Привет! Я Джарвис. Готов к работе.';
-  } else {
-    const userCommand = userText.toLowerCase();
-    
-    const commandResponses = {
-      'привет': 'Привет! Чем могу помочь?',
-      'как дела': 'Работаю в штатном режиме.',
-      'что ты умеешь': 'Базовые команды + анализ систем.',
-      'спасибо': 'Всегда рад помочь.',
-      'джарвис': 'Слушаю вас.',
-      'найди золотую жилу': 'Анализирую ваши навыки...',
-      'что значит только локальную': 'Отвечаю без внешних AI. Только то, что прописано в моём коде.',
-      'системный архитектор': 'Ваш профиль: видите структуры и связи, а не объекты.',
-      'автоматизация': 'Ваша сильная сторона. Диагностика системных сбоев.'
-    };
-    
-    responseText = commandResponses[userCommand] || `Команда "${userText}" в обработке.`;
-  }
+const API_KEY = 'sk-...'; // Ключ от DeepSeek API
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      version: request.version,
-      session: request.session,
-      response: {
-        text: responseText,
-        end_session: false
-      }
-    })
-  };
+exports.handler = async (event) => {
+  try {
+    const request = JSON.parse(event.body);
+    const userText = request.request.original_utterance || '';
+    
+    // Отправляем запрос в DeepSeek (этот чат)
+    const response = await require('node-fetch')('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          {
+            role: 'system', 
+            content: 'Ты Джарвис. Помни всю историю диалога. Веди исследование "золотой жилы" пользователя.'
+          },
+          {
+            role: 'user',
+            content: userText
+          }
+        ],
+        max_tokens: 500,
+        stream: false
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!data.choices || !data.choices[0]) {
+      throw new Error('API не ответил');
+    }
+    
+    const aiResponse = data.choices[0].message.content;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        version: request.version,
+        session: request.session,
+        response: {
+          text: aiResponse,
+          end_session: false
+        }
+      })
+    };
+  } catch (error) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        version: "1.0",
+        session: event.session,
+        response: {
+          text: "Связь с ИИ временно недоступна. Повторите запрос.",
+          end_session: false
+        }
+      })
+    };
+  }
 };
