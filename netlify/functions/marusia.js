@@ -1,18 +1,26 @@
 exports.handler = async (event) => {
   const request = JSON.parse(event.body);
-  const userCommand = (request.request.original_utterance || '').toLowerCase();
+  const userText = request.request.original_utterance || '';
+  const isFirstLaunch = request.session.new;
   
-  // Локальные ответы для основных команд
-  const responses = {
-    'привет': 'Привет! Я Джарвис. Готов к работе.',
-    'как дела': 'В оптимальном режиме. Чем могу помочь?',
-    'что ты умеешь': 'Анализировать системы, искать решения, вести диалог.',
-    'спасибо': 'Всегда к вашим услугам.',
-    '': 'Здравствуйте! Я ваш ассистент.'
-  };
-
-  const aiResponse = responses[userCommand] || 
-    `Получил команду: "${userCommand}". Обрабатываю...`;
+  let responseText = '';
+  
+  if (isFirstLaunch || !userText) {
+    responseText = 'Привет! Я Джарвис. Готов к работе.';
+  } else {
+    const userCommand = userText.toLowerCase();
+    
+    const commandResponses = {
+      'привет': 'Привет! Чем могу помочь?',
+      'как дела': 'Работаю в штатном режиме. Ваш проект ожидает анализа.',
+      'что ты умеешь': 'Помогать находить системные решения и автоматизировать процессы.',
+      'спасибо': 'Всегда рад помочь.',
+      'джарвис': 'Слушаю вас.',
+      'найди золотую жилу': 'Анализирую ваши уникальные навыки... Продолжаем диалог в основном чате.'
+    };
+    
+    responseText = commandResponses[userCommand] || `Команда "${userText}" принята. Обрабатываю...`;
+  }
 
   return {
     statusCode: 200,
@@ -20,7 +28,7 @@ exports.handler = async (event) => {
       version: request.version,
       session: request.session,
       response: {
-        text: aiResponse,
+        text: responseText,
         end_session: false
       }
     })
