@@ -5,23 +5,23 @@ exports.handler = async (event) => {
     const request = JSON.parse(event.body);
     const userCommand = request.request.command || "Привет";
     
-    const response = await require('node-fetch')("https://api.openai.com/v1/chat/completions", {
+    const response = await require('node-fetch')("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "deepseek-chat",
         messages: [{role: "user", content: userCommand}],
-        max_tokens: 100
+        max_tokens: 150
       })
     });
 
     const data = await response.json();
     
     if (!data.choices || !data.choices[0]) {
-      throw new Error('OpenAI API returned no choices');
+      throw new Error('DeepSeek API returned no choices');
     }
     
     const aiResponse = data.choices[0].message?.content || 'Нет ответа';
