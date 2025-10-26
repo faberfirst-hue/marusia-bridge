@@ -12,9 +12,9 @@ exports.handler = async (event) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-  model: "gpt-3.5-turbo",
-  messages: [{role: "user", content: userCommand}],
-  max_tokens: 100
+        model: "gpt-3.5-turbo",
+        messages: [{role: "user", content: userCommand}],
+        max_tokens: 100
       })
     });
 
