@@ -2,37 +2,20 @@ const API_KEY = process.env.OPENAI_API_KEY;
 
 exports.handler = async (event) => {
   try {
-    const request = JSON.parse(event.body);
-    const userCommand = request.request.command || "Привет";
-    
-    const response = await require('node-fetch')("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{role: "user", content: userCommand}],
-        max_tokens: 150
-      })
+    const testResponse = await require('node-fetch')("https://api.openai.com/v1/models", {
+      method: "GET", 
+      headers: {"Authorization": `Bearer ${API_KEY}`}
     });
-
-    const data = await response.json();
     
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('OpenAI API returned no choices');
-    }
+    const testData = await testResponse.json();
     
-    const aiResponse = data.choices[0].message?.content || 'Нет ответа';
-
     return {
       statusCode: 200,
       body: JSON.stringify({
-        version: request.version,
-        session: request.session,
+        version: "1.0",
+        session: {},
         response: {
-          text: aiResponse,
+          text: "Моделей: " + (testData.data?.length || 0),
           end_session: false
         }
       })
@@ -42,7 +25,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         version: "1.0",
-        session: event.session,
+        session: {},
         response: {
           text: "Ошибка: " + error.message,
           end_session: false
