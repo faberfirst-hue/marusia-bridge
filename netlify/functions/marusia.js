@@ -1,18 +1,16 @@
-const API_KEY = process.env.OPENAI_API_KEY;
-
 exports.handler = async (event) => {
   try {
     const request = JSON.parse(event.body);
     const userCommand = request.request.command || (request.request.type === "SimpleUtterance" ? "Привет" : "Поприветствуй меня");
     
-    const response = await require('node-fetch')("https://api.deepseek.com/v1/chat/completions", {
+    // Бесплатный AI API без ключа
+    const response = await require('node-fetch')("https://api.vsegpt.ru/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "openai/gpt-3.5-turbo",
         messages: [{role: "user", content: userCommand}],
         max_tokens: 150,
         stream: false
@@ -22,7 +20,7 @@ exports.handler = async (event) => {
     const data = await response.json();
     
     if (!data.choices || !data.choices[0]) {
-      throw new Error('DeepSeek API returned no choices: ' + JSON.stringify(data));
+      throw new Error('AI API returned no choices: ' + JSON.stringify(data));
     }
     
     const aiResponse = data.choices[0].message?.content || 'Нет ответа';
