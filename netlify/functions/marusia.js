@@ -5,7 +5,6 @@ exports.handler = async (event) => {
     const request = JSON.parse(event.body);
     const userCommand = request.request.command || "Привет";
     
-    // Используем node-fetch
     const response = await require('node-fetch')("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
